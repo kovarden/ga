@@ -47,7 +47,8 @@ class GA:
                  population_length=10,
                  generations=100,
                  mutation_chance=0.1,
-                 crossover_chance=0.5
+                 crossover_chance=0.5,
+                 differential=30
                  ):
         self.population = Population([Individual(individual) for individual in init_population])
         for individual in self.population.individuals:
@@ -59,6 +60,7 @@ class GA:
         self.crossover_chance = crossover_chance
         self.best_individual = self.population.individuals[1]
         self.best_generation = 0
+        self.differential = differential
 
     def run(self):
         current_generation = 0
@@ -82,7 +84,7 @@ class GA:
                     self.best_individual = individual
                     self.best_generation = i
                 self.population.individuals.append(individual)
-            if current_generation - self.best_generation > 100:
+            if current_generation - self.best_generation > self.differential:
                 break
 
     def top(self, k=1):
@@ -115,7 +117,8 @@ if __name__ == '__main__':
         population_length=POPUlATION_LENGTH,
         generations=1000,
         mutation_chance=0.1,
-        crossover_chance=0.5
+        crossover_chance=0.5,
+        differential=30
     )
     my_ga.run()
     print(my_ga.best_individual)
