@@ -92,12 +92,14 @@ class GA:
 
 
 if __name__ == '__main__':
+    import csv
+    import time
 
-    POPUlATION_LENGTH = 20
     data = [(8, 9), (7, 5), (4, 10), (5, 4), (7, 9), (6, 2), (6, 5), (6, 1), (4, 3), (3, 4)]
     max_mass = 30
 
-    individuals =[[random.randint(0, 1) for _ in range(len(data))] for _ in range(POPUlATION_LENGTH)]
+    pop_size = 20
+    individuals =[[random.randint(0, 1) for _ in range(len(data))] for _ in range(pop_size)]
 
     def fit_func(individual):
         fitness = 0
@@ -111,14 +113,24 @@ if __name__ == '__main__':
         else:
             return fitness
 
-    my_ga = GA(
-        individuals,
-        fit_func,
-        population_length=POPUlATION_LENGTH,
-        generations=1000,
-        mutation_chance=0.1,
-        crossover_chance=0.5,
-        differential=30
-    )
-    my_ga.run()
-    print(my_ga.best_individual)
+    results_list = []
+    for _ in range(100):
+        my_ga = GA(
+            individuals,
+            fit_func,
+            population_length=pop_size,
+            generations=500,
+            mutation_chance=0.1,
+            crossover_chance=0.5,
+            differential=30
+        )
+        start_time = time.time()
+        my_ga.run()
+        time_diff = time.time() - start_time
+        results_list.append([time_diff, my_ga.best_individual.fitness, my_ga.best_generation, my_ga.best_individual.chromosome])
+        print(time_diff)
+        print(my_ga.best_individual)
+    print(results_list)
+    with open("ga_lib_results.csv", "w", newline="") as file:
+        writer = csv.writer(file, delimiter = ';')
+        writer.writerows(results_list)
