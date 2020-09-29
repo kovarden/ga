@@ -57,9 +57,12 @@ class GA:
         self.generations = generations
         self.mutation_chance = mutation_chance
         self.crossover_chance = crossover_chance
+        self.best_individual = self.population.individuals[1]
+        self.best_generation = 0
 
     def run(self):
-        for _ in range(self.generations):
+        current_generation = 0
+        for i in range(self.generations):
             new_population = Population(self.population.individuals)
             for _ in range(self.population_length):
                 if random.random() < self.crossover_chance:
@@ -72,46 +75,47 @@ class GA:
                 if random.random() < self.mutation_chance:
                     individual.mutation(random.randint(0, len(individual.chromosome)-1))
                     individual.fitness = self.fit_function(individual.chromosome)
-            # new_population.calculation_fit_values(self.fit_function)
             self.population = Population([])
             for _ in range(self.population_length):
                 individual = new_population.roulette_coupling()
+                if individual.fitness > self.best_individual.fitness:
+                    self.best_individual = individual
+                    self.best_generation = i
                 self.population.individuals.append(individual)
+            if current_generation - self.best_generation > 100:
+                break
 
     def top(self, k=1):
         return sorted(self.population.individuals, key=lambda x: x.fitness, reverse=True)[:k]
 
 
 if __name__ == '__main__':
-    import math
-    individuals =[[0 for _ in range(5)] for _ in range(5)]
-    data = [(6, 5), (4, 3), (3, 1), (2, 3), (5, 6)]
-    full_mass = sum([item[1] for item in data])
-    max_mass = 15
-    delta_mass = max(max_mass, full_mass - max_mass)
+
+    POPUlATION_LENGTH = 20
+    data = [(8, 9), (7, 5), (4, 10), (5, 4), (7, 9), (6, 2), (6, 5), (6, 1), (4, 3), (3, 4)]
+    max_mass = 30
+
+    individuals =[[random.randint(0, 1) for _ in range(len(data))] for _ in range(POPUlATION_LENGTH)]
 
     def fit_func(individual):
         fitness = 0
         sum_mass = 0
-        if sum(individual) > 4:
-            return 0
         for selected, (price, mass) in zip(individual, data):
             if selected:
                 fitness += price
                 sum_mass += mass
         if sum_mass > max_mass:
-            fitness = 1 - math.sqrt((sum_mass - max_mass) / delta_mass)
+            return 0
         else:
-            fitness = 1 - math.sqrt((max_mass - sum_mass) / max_mass)
-        return fitness
+            return fitness
 
     my_ga = GA(
         individuals,
         fit_func,
-        population_length=10,
-        generations=10,
+        population_length=POPUlATION_LENGTH,
+        generations=1000,
         mutation_chance=0.1,
         crossover_chance=0.5
     )
     my_ga.run()
-    print(my_ga.top()[0])
+    print(my_ga.best_individual)
